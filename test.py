@@ -22,31 +22,31 @@ class TaskDB:
 
 class Task:
     def __init__(self, title, description="", due_date="", priority="Medium", category="General", completed=0):
-        self.title = title
-        self.description = description
-        self.due_date = due_date
-        self.priority = priority
-        self.category = category
-        self.completed = completed
+        self.title = title # task title
+        self.description = description # brief description of the task
+        self.due_date = due_date # deadline for the task
+        self.priority = priority # defaults to medium if not specified
+        self.category = category #grouping tasks by category
+        self.completed = completed # defaults to not completed
 
 class TaskManager:
     def __init__(self, db_name="tasks.db"):
-        self.db = TaskDB(db_name)
-
+        self.db = TaskDB(db_name) # creates a database connection instance
+# adding a task to the database
     def add_task(self, task):
-        with self.db.conn:
+        with self.db.conn: # ensures safe management of database operations
             self.db.cursor.execute("INSERT INTO tasks (title, description, due_date, priority, category, completed) VALUES (?, ?, ?, ?, ?, ?)",
                                    (task.title, task.description, task.due_date, task.priority, task.category, task.completed))
 
     def view_tasks(self, sort_by="priority", category=None):
         query = "SELECT * FROM tasks"
-        params = []
-        if category:
+        params = [] # Holds query parameters if filtering is needed
+        if category: # If a category is specified, filter tasks by that category
             query += " WHERE category = ?"
             params.append(category)
-        query += f" ORDER BY {sort_by} DESC"
+        query += f" ORDER BY {sort_by} DESC" # sorts tasks by priority
         self.db.cursor.execute(query, params)
-        tasks = self.db.cursor.fetchall()
+        tasks = self.db.cursor.fetchall() #retrieves all matching tasks
 
         print("\nTask List:")
         for task in tasks:
@@ -71,8 +71,8 @@ def main():
         print("5. Delete Task")
         print("6. Exit")
 
-        choice = input("Choose an option: ")
-        if choice == "1":
+        choice = input("Choose an option: ") # Gets user input
+        if choice == "1": #Adding tasks
             title = input("Task Title: ")
             description = input("Description (optional): ")
             due_date = input("Due Date (optional): ")
@@ -83,28 +83,28 @@ def main():
                 print("Invalid priority! Defaulting to 'Medium'.")
                 priority = "Medium"
 
-            category = input("Category: ")
+            category = input("Category: ") # gets category input
             manager.add_task(Task(title, description, due_date, priority, category))
 
-        elif choice == "2":
+        elif choice == "2": # view all tasks
             manager.view_tasks()
 
-        elif choice == "3":
+        elif choice == "3": # view tasks filtered by category
             category = input("Enter category: ")
             manager.view_tasks(category=category)
 
-        elif choice == "4":
+        elif choice == "4": # mark a task as complete
             task_id = int(input("Enter Task ID to mark as complete: "))
             manager.mark_complete(task_id)
 
-        elif choice == "5":
+        elif choice == "5": #delete a task
             task_id = int(input("Enter Task ID to delete: "))
             manager.delete_task(task_id)
 
-        elif choice == "6":
+        elif choice == "6": # exit the program
             break
         else:
             print("Invalid choice, try again!")
 
 if __name__ == "__main__":
-    main()
+    main() # starts the program
